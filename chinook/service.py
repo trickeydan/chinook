@@ -18,33 +18,35 @@ if TYPE_CHECKING:
 class ChinookService:
     """Base class for a chinook service."""
 
-    def __init__(self) -> None:
+    def __init__(self, domain: StateDomain) -> None:
+        self._domain = domain
         self._state = ChinookState(disks=None, process=None, tick=None)
         self._state_lock = asyncio.Lock()
 
     async def main(self) -> None:
         """Main routine."""
+        will = aiomqtt.Will(f"ast/dom/{self._domain}", retain=True)
         async with contextlib.AsyncExitStack() as stack:
-            client = aiomqtt.Client("localhost", client_id="test")
-            await stack.enter_async_context(client)
+            self._client = aiomqtt.Client("localhost", client_id="test", will=will)
+            await stack.enter_async_context(self._client)
 
-            await self.setup(client)
+            await self.setup(self._client)
 
             tasks = set()
 
             for domain, model in DOMAIN_MAP.items():
-                manager = client.filtered_messages(f"ast/dom/{domain}")
+                manager = self._client.filtered_messages(f"ast/dom/{domain}")
                 messages = await stack.enter_async_context(manager)
                 task = asyncio.create_task(
                     self._handle_state_message(messages, domain, model),
                 )
                 tasks.add(task)
 
-            messages = await stack.enter_async_context(client.unfiltered_messages())
+            messages = await stack.enter_async_context(self._client.unfiltered_messages())
             task = asyncio.create_task(self._handle_unknown_message(messages))
             tasks.add(task)
 
-            await client.subscribe("ast/dom/+")
+            await self._client.subscribe("ast/dom/+")
 
             await asyncio.gather(*tasks)
 
@@ -91,6 +93,7 @@ class ChinookService:
 
     async def _cancel_tasks(self) -> None:
         """Cancel all tasks and end the service."""
+        await self._client.publish(f"ast/dom/{self._domain}", retain=True)  # TODO: EWww
         for task in asyncio.all_tasks():
             if task.done():
                 continue

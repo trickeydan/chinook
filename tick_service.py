@@ -19,7 +19,11 @@ class TestService(ChinookService):
                     n += self._state["tick"].n
                 else:
                     n += 1
-            await client.publish("ast/dom/tick", f"{{\"n\": {n}}}")
+            await client.publish(
+                f"ast/dom/{self._domain}",
+                f"{{\"n\": {n}}}",
+                retain=True,
+            )
             await asyncio.sleep(1)
 
     async def forever(self) -> None:
@@ -42,7 +46,7 @@ class TestService(ChinookService):
 
 
 if __name__ == "__main__":
-    service = TestService()
+    service = TestService("tick")
     try:
         asyncio.run(service.main())
     except asyncio.CancelledError:

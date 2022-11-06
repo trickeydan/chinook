@@ -28,6 +28,10 @@ Currently the underlying event bus is undefined. MQTT 3.1 and 5 are both suitabl
 
 The plan is to implement a common interface around several of these and work out which is most suitable.
 
+- Pub-Sub
+- Retained Messages - get data without having to ask for it from the service.
+- Last Will - work out when a services has disconnected unexpectedly, i.e badly crashed.
+
 ### State Update
 
 A state update message is published from a single service to all other services. It contains the latest state for that domain.
@@ -41,3 +45,7 @@ Each service will also react to it's own domain being updated, although it may i
 ### Stream
 
 **TBC**
+
+## Outstanding Qs
+
+- When should a service publish it's first state?

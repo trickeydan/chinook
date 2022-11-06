@@ -12,6 +12,8 @@ ignore =
     #Don't require docstrings for __init__ methods.
     D107
     #Don't require imperative mood docstrings.
-    D401
+    D401,
+    #Ignore TODO
+    T000
 
 max_line_length = 90
