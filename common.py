@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import Dict, Literal, Type, TypedDict, Union
 from pydantic import BaseModel
 
 class DiskState(BaseModel):
@@ -14,8 +14,9 @@ class TickState(BaseModel):
 
     n: int
 
+StateDomain = Union[Literal["disks"], Literal["process"], Literal["tick"]]
 
-DOMAIN_MAP = {
+DOMAIN_MAP: Dict[StateDomain, Type[BaseModel]] = {
     "disks": DiskState,
     "process": ProcessState,
     "tick": TickState,

@@ -8,7 +8,7 @@ from typing import AsyncGenerator, TYPE_CHECKING, Type
 import asyncio_mqtt as aiomqtt
 from pydantic import BaseModel, ValidationError, parse_raw_as
 
-from common import DOMAIN_MAP, AstoriaState
+from common import DOMAIN_MAP, AstoriaState, StateDomain
 
 if TYPE_CHECKING:
     from paho.mqtt.client import MQTTMessage
@@ -57,7 +57,7 @@ class AstoriaService:
     async def _handle_state_message(
         self,
         messages: AsyncGenerator[MQTTMessage, None],
-        domain: str,
+        domain: StateDomain,
         model: Type[BaseModel],
     ) -> None:
         async for message in messages:
@@ -65,7 +65,7 @@ class AstoriaService:
                 try:
                     data = parse_raw_as(model, message.payload)
                     async with self._state_lock:
-                        self._state[domain] = data
+                        self._state[domain] = data  # type: ignore[typeddict-item]
                         asyncio.create_task(self.handle_state(self._state))
                 except ValidationError as e:
                     print(e)
