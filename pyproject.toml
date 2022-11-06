@@ -1,0 +1,60 @@
+[tool.poetry]
+name = "chinook"
+version = "0.0.0"
+description = "Experimental IPC System"
+authors = ["Dan Trickey <git@trickey.io>"]
+license = "MIT"
+readme = "README.md"
+classifiers = ["Private :: Do not Upload"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+asyncio-mqtt = "^0.13.0"
+pydantic = "^1.10.2"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "*"
+flake8-commas = "*"
+flake8-comprehensions = "*"
+flake8-debugger = "*"
+flake8-docstrings = "*"
+flake8-isort = "*"
+flake8-mutable = "*"
+flake8-todo = "*"
+mypy = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-asyncio = "*"
+rope = "*"
+isort = "*"
+
+[tool.isort]
+atomic = true
+balanced_wrapping = true
+multi_line_output = 3
+include_trailing_comma = true
+
+[tool.mypy]
+mypy_path = "stubs"
+
+warn_unused_ignores = true
+warn_return_any = true
+
+strict_optional = true
+no_implicit_optional = true
+
+disallow_any_unimported = true
+disallow_any_explicit = true
+disallow_subclassing_any = true
+disallow_any_generics = true
+
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+
+check_untyped_defs = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
