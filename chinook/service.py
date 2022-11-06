@@ -8,15 +8,15 @@ from typing import AsyncGenerator, TYPE_CHECKING, Type
 import asyncio_mqtt as aiomqtt
 from pydantic import BaseModel, ValidationError, parse_raw_as
 
-from common import DOMAIN_MAP, AstoriaState, StateDomain
+from .common import DOMAIN_MAP, ChinookState, StateDomain
 
 if TYPE_CHECKING:
     from paho.mqtt.client import MQTTMessage
 
-class AstoriaService:
+class ChinookService:
 
     def __init__(self) -> None:
-        self._state = AstoriaState(disks=None, process=None, tick=None)
+        self._state = ChinookState(disks=None, process=None, tick=None)
         self._state_lock = asyncio.Lock()
 
     async def main(self) -> None:
@@ -47,7 +47,7 @@ class AstoriaService:
     async def setup(self, client) -> None:
         pass
 
-    async def handle_state(self, state: AstoriaState) -> None:
+    async def handle_state(self, state: ChinookState) -> None:
         pass
 
     async def _handle_unknown_message(self, messages: AsyncGenerator[MQTTMessage, None]) -> None:
@@ -85,42 +85,3 @@ class AstoriaService:
                 await task
             except asyncio.CancelledError:
                 pass
-
-
-class TestService(AstoriaService):
-
-    async def tick(self, client: aiomqtt.Client) -> None:
-        await asyncio.sleep(1)
-        n = 1
-        while True:
-            async with self._state_lock:
-                if self._state["tick"]:
-                    n += self._state["tick"].n
-                else:
-                    n += 1
-            await client.publish("ast/dom/tick", f"{{\"n\": {n}}}")
-            await asyncio.sleep(1)
-
-    async def forever(self) -> None:
-        while True:
-            print("yeet")
-            await asyncio.sleep(0.5)
-
-    async def setup(self, client) -> None:
-        asyncio.create_task(self.forever())
-        asyncio.create_task(self.tick(client))
-
-    async def handle_state(self, state: AstoriaState) -> None:
-        print(state)
-        if state["tick"] and state["tick"].n > 4000:
-            print("Time to exit!")
-            await self._cancel_tasks()
-
-
-
-if __name__ == "__main__":
-    service = TestService()
-    try:
-        asyncio.run(service.main())
-    except asyncio.CancelledError:
-        print("Exited")

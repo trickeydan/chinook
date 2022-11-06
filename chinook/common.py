@@ -22,7 +22,7 @@ DOMAIN_MAP: Dict[StateDomain, Type[BaseModel]] = {
     "tick": TickState,
 }
 
-class AstoriaState(TypedDict):
+class ChinookState(TypedDict):
 
     disks: DiskState | None
     process: ProcessState | None
